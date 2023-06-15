@@ -79,7 +79,7 @@ public class Event implements Serializable {
 	public void setEventType(EventType eventType) {
 		this.eventType = eventType;
 	}
-	public boolean isStatus() {
+	public boolean getStatus() {
 		return status;
 	}
 	public void setStatus(boolean status) {

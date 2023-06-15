@@ -1,11 +1,11 @@
 package com.masai.customer;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-
 import com.masai.booking.Booking;
 
-public class Customer {
+public class Customer implements Serializable{
 
 	
 	private String firstName;
@@ -81,7 +81,7 @@ public class Customer {
 	}
 	@Override
 	public String toString() {
-		return "Customer [Name=" + getFirstName() + getLastName() + ", address=" + getAddress()
+		return "Customer [Name=" + getFirstName() +" "+ getLastName() + ", address=" + getAddress()
 				+ ", mobileNumber=" + getMobileNumber() + ", userName=" + getUserName()
 				+ ", bookingHistory=" + getBookingHistory() + "]";
 	}

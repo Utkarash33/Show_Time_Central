@@ -1,15 +1,21 @@
 package com.masai;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Scanner;
 import com.masai.admin.Administrator;
 import com.masai.booking.Booking;
 import com.masai.booking.BookingServiceImpl;
+import com.masai.booking.BookingServices;
 import com.masai.customer.Customer;
 import com.masai.customer.CustomerService;
 import com.masai.customer.CustomerServiceImpl;
@@ -18,6 +24,7 @@ import com.masai.event.EventServices;
 import com.masai.event.EventServicesImpl;
 import com.masai.event.EventType;
 import com.masai.exceptions.AuthenticationException;
+import com.masai.exceptions.BookingException;
 import com.masai.exceptions.DuplicateDataException;
 import com.masai.exceptions.EventException;
 import com.masai.exceptions.InvalidChoiceException;
@@ -40,12 +47,12 @@ public class Main {
 		Map<String, Customer> customer = FileExists.customerFile();
 		Map<Integer, Event> event = FileExists.eventFile();
 		List<Booking> bookings = FileExists.bookingFile();
-//		System.out.println(customer.size());
 		try {
 			
+			boolean flag = true;
 			
 			///To make the first choice
-			while(true)
+			while(flag)
 			{
 				System.out.println("Welcome to ShowTime Central");
 				System.out.println("1. Administrator");
@@ -64,7 +71,7 @@ public class Main {
 				case 1:
 					 
 					//admin
-					handleAdminstrator();
+					handleAdminstrator(scanner,customer,event,bookings);
 					break;
 				
 				case 2:
@@ -97,6 +104,7 @@ public class Main {
 					 
 					
 					System.out.println("Thank you for using ShowTime Centeral.");
+					flag = false;
 					break;
 				
 				default:
@@ -110,31 +118,22 @@ public class Main {
 			
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
-		} finally {
-			// serialization (finally always executed)
-			try {
-				ObjectOutputStream evn = new ObjectOutputStream(new FileOutputStream("Event.ser"));
-				evn.writeObject(event);
-				ObjectOutputStream coos = new ObjectOutputStream(new FileOutputStream("Customer.ser"));
-				coos.writeObject(customer);
-
-				ObjectOutputStream toos = new ObjectOutputStream(new FileOutputStream("Transactions.ser"));
-				toos.writeObject(bookings);
-			//	System.out.println("serialized..........");
-			} catch (Exception e) {
-				// TODO: handle exception
-				System.out.println(e.getMessage());
-			}
 		}
 	}
 
+
+	
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
 	
 	////Method to handle the functionality related to Customer
 	
 	
 	private static void handleCustomer(Scanner sc, Map<String, Customer> customer , Map<Integer , Event> events , List<Booking> book) throws InvalidChoiceException, DuplicateDataException, AuthenticationException, InvalidDetailsException {
 
-		while(true)
+		
+		boolean flag = true;
+		while(flag)
 		{
 			System.out.println("1. SignIn");
 			System.out.println("2. Login");
@@ -150,7 +149,11 @@ public class Main {
 			{
 			case 1:
 				 
-				customerSignUp(sc,customer);
+				try {
+					customerSignUp(sc,customer);
+				} catch (DuplicateDataException | IOException e) {
+					e.printStackTrace();
+				}
 				break;
 				
 			
@@ -161,7 +164,7 @@ public class Main {
 			
 			case 3:
 					 
-					
+				flag = false;
 				return;
 			default:
 				 
@@ -174,7 +177,7 @@ public class Main {
 	}
 	//Sign in part.//////////
 	
-	private static void customerSignUp(Scanner sc, Map<String, Customer> customer) throws DuplicateDataException {
+	private static void customerSignUp(Scanner sc, Map<String, Customer> customer) throws DuplicateDataException, FileNotFoundException, IOException {
 		System.out.println("please enter the following details to Signup");
 		System.out.println("please enter the first name");
 		String firstName = sc.next();
@@ -223,7 +226,7 @@ public class Main {
 				System.out.println("Press 3 to add money to a wallet");
 				System.out.println("Press 4 view wallet balance");
 				System.out.println("Press 5 view my details");
-				System.out.println("Press 6 view my transactions");
+				System.out.println("Press 6 view my bookings");
 				System.out.println("Press 7 to logout");
 				
 				
@@ -234,29 +237,41 @@ public class Main {
 				switch (choice) {
 				case 1:
 					//to see all events
+					
 					customerViewAllEvents(events, eventService);
 					break;
 				case 2:
+					//book event
+					
 					String result = customerBookEvent(sc, email, events, customer, book, cusService);
 					System.out.println(result);
 					break;
 				case 3:
+					//add moeny to wallet 
+					
 					String moneyAdded = customerAddMoneyToWallet(sc, email, customer, cusService);
 					System.out.println(moneyAdded);
 					break;
 				case 4:
+				  /// to check the wallet Balance
+					
 					double walletBalance = customerViewWalletBalance(email, customer, cusService);
 					System.out.println("Wallet balance is: " + walletBalance);
 					break;
 				case 5:
+					// to check customer own detail
+					
 					customerViewMyDetails(email, customer, cusService);
 					break;
-//				case 6:
-//					customerViewCustomerTransactions(email, transactions, trnsactionService);
-//					break;
+				case 6:
+					// to check booking detail  
+					
+					customerViewCustomerBookings(email, book, boo);
+					break;
 				case 7:
 					System.out.println("you have successsfully logout");
-					break;
+					choice=10;
+					return;
 				default:
 					System.out.println("invalid choice");
 					break;
@@ -268,8 +283,18 @@ public class Main {
 		}
 	}
 
+	private static void customerViewCustomerBookings(String email, List<Booking> book, BookingServiceImpl boo2) throws BookingException {
+		
+		List<Booking> myTransactions = boo.viewCustomerBookings(email, book);
+
+		for (Booking tr : myTransactions) {
+			System.out.println(tr);
+		}
+	}
+
+
 	private static String customerBookEvent(Scanner sc, String email, Map<Integer, Event> events,
-			Map<String, Customer> customer, List<Booking> boo, CustomerService cusService) throws InvalidDetailsException, EventException {
+			Map<String, Customer> customer, List<Booking> boo, CustomerService cusService) throws InvalidDetailsException, EventException, FileNotFoundException, IOException {
 		System.out.println("Enter the event id or name");
 		int id = sc.nextInt();
 		System.out.println("enter the number of tickets");
@@ -281,7 +306,7 @@ public class Main {
 
 
 	public static String customerAddMoneyToWallet(Scanner sc, String email, Map<String, Customer> customers,
-			CustomerService cusService) {
+			CustomerService cusService) throws FileNotFoundException, IOException {
 		System.out.println("please enter the amount");
 		double money = sc.nextDouble();
 		boolean added = cusService.addMoneyToWallet(money, email, customers);
@@ -302,7 +327,6 @@ public class Main {
 		System.out.println("address : " + cus.getAddress());
 		System.out.println("wallet balance : " + cus.getBalance());
 	}
-
 
 private static void customerViewAllEvents(Map<Integer, Event> events, EventServicesImpl eventService) throws EventException {
 		
@@ -361,26 +385,35 @@ private static void customerViewAllEvents(Map<Integer, Event> events, EventServi
 					break;
 				case 4:
 					//this method is same as customer so I use the same method again here
-					customerViewAllEvents(events, eventService);
+					ViewAllEventsOrganizer(events, eventService);
 					break;
 				case 5:
 					System.out.println("you have successsfully logout");
-					break;
+					choice=10;
+					return;
 				default:
 					System.out.println("invalid choice");
 					break;
 				}
 
-			} while (choice <= 4);
+			} while (choice <= 5);
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
-		}
+		} 
+			
 	
 	}
 
+	private static void ViewAllEventsOrganizer(Map<Integer, Event> events, EventServicesImpl eventService2) throws EventException {
+		
+		
+		eventService.viewAllEventForOrganizer(events);
+	}
+
+
 	//Method related Event ORganizer///////////////////////////
 	
-	public static String addEvent(Scanner sc, Map<Integer, Event> events, EventServices eventService, String nameOrgainzer) {
+	public static String addEvent(Scanner sc, Map<Integer, Event> events, EventServices eventService, String nameOrgainzer) throws FileNotFoundException, IOException {
 		sc.nextLine();
 		System.out.println("please enter the Event details");
 		System.out.println("Enter the Event name");
@@ -410,17 +443,17 @@ private static void customerViewAllEvents(Map<Integer, Event> events, EventServi
 		return str;
 
 	}
-	public static void deleteEvent(Scanner sc, Map<Integer, Event> products, EventServices evnService)
-			throws EventException {
+	public static void deleteEvent(Scanner sc, Map<Integer, Event> events, EventServices evnService)
+			throws EventException, FileNotFoundException, IOException {
 
 		System.out.println("please enter the id of product to be deleted");
 		int id = sc.nextInt();
 		System.out.println("Name of the orgainzer");
 		String org = sc.next();	
-		evnService.deleteEvent(id, products,org);
+		evnService.deleteEvent(id, events,org);
 	}
 	public static String updateEvent(Scanner sc, Map<Integer, Event> event)
-			throws EventException {
+			throws EventException, FileNotFoundException, IOException {
 		String result = null;
 		System.out.println("please enter the id of the Event which is to be updated");
 		int id = sc.nextInt();
@@ -456,35 +489,21 @@ private static void customerViewAllEvents(Map<Integer, Event> events, EventServi
 		result  = eventService.updateEvent(id, update, event,org);
 		return result;
 	}
-//
-//	public static void adminViewAllCustomers(Map<String, Customer> customers, CustomerService cusService)
-//			throws ProductException {
-//		List<Customer> list = cusService.viewAllCustomers(customers);
-//
-//		for (Customer c : list) {
-//			System.out.println(c);
-//		}
-//	}
-//
-//	public static void adminViewAllTransactions(List<Transaction> transactions, TransactionService trnsactionService)
-//			throws TransactionException {
-//		List<Transaction> allTransactions = trnsactionService.viewAllTransactions(transactions);
-//
-//		for (Transaction tr : allTransactions) {
-//			System.out.println(tr);
-//		}
-//
-//	}
-//	
+
+	
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	
 	//////Method to handle the functionality related to Admin
 	
-	private static void handleAdminstrator() {
+	private static void handleAdminstrator(Scanner sc, Map<String, Customer> customer, Map<Integer, Event> event, List<Booking> bookings) {
 		try {
+			sc.nextLine();
 			System.out.println("Enter Administrator username");
-			String username = scanner.nextLine();
+			String username = sc.nextLine();
 			
 			System.out.println("Enter Password");
-			String password = scanner.nextLine();
+			String password = sc.nextLine();
 			
 			
 			if(!Administrator.authenticate(username, password))
@@ -504,51 +523,56 @@ private static void customerViewAllEvents(Map<Integer, Event> events, EventServi
 				System.out.println("2. Reject Event Organizer");
 				System.out.println("3. View Events");
 				System.out.println("4. View Bookings");
-				System.out.println("5. Back ");
+				System.out.println("5. View All Customers");
+				System.out.println("6. Back ");
 				
 				
 				System.out.println("Enter your choice: ");
 				
 				////after making the choice////////////////
 				
-				int choice = scanner.nextInt();
+				int choice = sc.nextInt();
 				
-				scanner.nextLine();
+				sc.nextLine();
 				
 				switch(choice)
 				{
 				case 1:
-					 
-					
-					approveEventOrganizer();
+				
+					approveEventOrganizer(sc,event);
 					break;
 				
 				case 2:
 					 
 					
-					rejectEventOrganizer();
+					rejectEventOrganizer( sc ,event);
 					break;
 				
 				case 3:
 						 
 						
-					viewEvents(); 
+					viewEvents(event); 
 					break;
 				case 4:
 					 
 					
-					viewBookings();
+					viewBookings(bookings);
+					break;
+					
+				case 5:
+					
+					viewAllCustomers(customer);
 					break;
 				
-				case 5:
+				case 6:
 					 
 					return;
 				
 				default:
 					 
-					
-					throw new InvalidChoiceException("invalid Choice. Please try again");
-				}
+					System.out.println("invalid choice");
+					break;
+					}
 				
 			}
 			
@@ -560,28 +584,43 @@ private static void customerViewAllEvents(Map<Integer, Event> events, EventServi
 		
 	}
 
+private static void viewAllCustomers(Map<String, Customer> customer) throws BookingException {
+	  
+	Map<String, Customer> list = cusService.viewAllCustomers(customer);
 	
-	
-	
-	
-	
-	private static void viewBookings() {
-		// TODO Auto-generated method stub
+	for(Map.Entry<String, Customer> cus : list.entrySet())
+	{
+		System.out.println(cus);
+	}
+	}
+
+
+
+private static void viewBookings(List<Booking> book) throws BookingException {
+		
+		List<Booking> myBookings = boo.viewAllBookings(book);
+		for (Booking tr : myBookings) {
+			System.out.println(tr);
+		}
+	}
+
+	private static void viewEvents(Map<Integer, Event> event) throws EventException {
+		 eventService.viewAllEventForOrganizer(event);
+	}
+
+	private static void rejectEventOrganizer(Scanner sc, Map<Integer, Event> event) throws EventException, FileNotFoundException, IOException {
+				
+
+			System.out.println("please enter the id of product to be Rejected");
+			int id = sc.nextInt();	
+			eventService.deleteEvent(id, event,"admin");
 		
 	}
 
-	private static void viewEvents() {
-		// TODO Auto-generated method stub
+	private static void approveEventOrganizer(Scanner sc ,Map<Integer, Event> event) throws EventException, IOException {
 		
-	}
-
-	private static void rejectEventOrganizer() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	private static void approveEventOrganizer() {
-		// TODO Auto-generated method stub
-		
+		System.out.println("Enter the Id of the event to approve");
+		int id = sc.nextInt();
+		eventService.approveEvent(id,event);
 	}
 }

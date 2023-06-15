@@ -1,5 +1,9 @@
 package com.masai.customer;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -8,6 +12,7 @@ import com.masai.booking.Booking;
 import com.masai.booking.BookingServiceImpl;
 import com.masai.event.Event;
 import com.masai.exceptions.AuthenticationException;
+import com.masai.exceptions.BookingException;
 import com.masai.exceptions.DuplicateDataException;
 import com.masai.exceptions.EventException;
 import com.masai.exceptions.InvalidDetailsException;
@@ -16,13 +21,16 @@ public class CustomerServiceImpl  implements CustomerService
 {
 
 	@Override
-	public void signUp(Customer cus, Map<String, Customer> customers) throws DuplicateDataException {
+	public void signUp(Customer cus, Map<String, Customer> customers) throws DuplicateDataException, FileNotFoundException, IOException {
 
 		if (customers.containsKey(cus.getUserName())) {
 			throw new DuplicateDataException("Customer already exists , please login");
 		} else {
 
 			customers.put(cus.getUserName(), cus);
+			ObjectOutputStream coos = new ObjectOutputStream(new FileOutputStream("Customer.ser"));
+			coos.writeObject(customers);
+
 
 		}
 
@@ -47,7 +55,7 @@ public class CustomerServiceImpl  implements CustomerService
 	}
 
 	@Override
-	public boolean addMoneyToWallet(double amount, String email, Map<String, Customer> customers) {
+	public boolean addMoneyToWallet(double amount, String email, Map<String, Customer> customers) throws FileNotFoundException, IOException {
 		// TODO Auto-generated method stub
 
 		Customer cus = customers.get(email);
@@ -55,6 +63,8 @@ public class CustomerServiceImpl  implements CustomerService
 		cus.setBalance(cus.getBalance() + amount);
 
 		customers.put(email, cus);
+		ObjectOutputStream coos = new ObjectOutputStream(new FileOutputStream("Customer.ser"));
+		coos.writeObject(customers);
 
 		return true;
 	}
@@ -80,7 +90,7 @@ public class CustomerServiceImpl  implements CustomerService
 	}
 
 	public void bookEvent(int id, int qty, String email, Map<Integer, Event> events, Map<String, Customer> customer,
-			List<Booking> boo) throws InvalidDetailsException, EventException {
+			List<Booking> boo) throws InvalidDetailsException, EventException, FileNotFoundException, IOException {
 
 			if (events.size() == 0)
 				throw new EventException("Product list is empty");
@@ -88,11 +98,13 @@ public class CustomerServiceImpl  implements CustomerService
 			if (events.containsKey(id)) {
 
 				Event env = events.get(id);
-
+               
 				if (env.getTotalSeats() >= qty) {
 
 					Customer cus = customer.get(email);
 
+					 List<Booking>  book=  cus.getBookingHistory();
+					 
 					double buyingPrice = qty * env.getTicketPrice();
 
 					if (cus.getBalance() >= buyingPrice) {
@@ -101,11 +113,16 @@ public class CustomerServiceImpl  implements CustomerService
 						env.setTotalSeats(env.getTotalSeats() - qty);
 
 						events.put(id, env);
-
+                        
 						Booking br = new Booking(cus.getUserName(), email, id,env.getEventName(), qty, env.getTicketPrice(),
 								env.getTicketPrice() * qty, LocalDate.now());
 
+						book.add(br);
+						cus.setBookingHistory(book);
 						boo.add(br);
+						ObjectOutputStream boos = new ObjectOutputStream(new FileOutputStream("Transactions.ser"));
+						boos.writeObject(boo);
+						
 
 					} else {
 						throw new InvalidDetailsException("wallet balance is not sufficient");
@@ -123,6 +140,18 @@ public class CustomerServiceImpl  implements CustomerService
 		
 
 		
+	}
+
+	@Override
+	public Map<String, Customer> viewAllCustomers(Map<String, Customer> customer) throws BookingException {
+	
+		
+		if(customer != null && customer.size()>0) {
+			return customer;
+		}
+		else {
+			throw new BookingException("no Customers yet");
+		}
 	}
 
 
