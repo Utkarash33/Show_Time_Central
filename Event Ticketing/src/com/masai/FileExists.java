@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -29,16 +30,14 @@ public class FileExists {
 			}
 
 			if (flag) {
-				
 				cFile = new LinkedHashMap<>();
 				ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(f));
 				oos.writeObject(cFile);
 				return cFile;
 
 			} else {
-				
 				ObjectInputStream ois = new ObjectInputStream(new FileInputStream(f));
-				cFile = (Map<String, Customer>) ois.readObject();
+				cFile = (Map<String, Customer>)ois.readObject();
 
 				return cFile;
 
@@ -46,7 +45,7 @@ public class FileExists {
 
 		} catch (Exception e) {
 			// TODO: handle exception
-
+            e.getStackTrace();
 			System.out.println(e.getMessage());
 		}
 		return cFile;
@@ -77,8 +76,9 @@ public class FileExists {
 
 			} else {
 
+
 				ObjectInputStream ois = new ObjectInputStream(new FileInputStream(f));
-				pFile = (Map<Integer, Event>) ois.readObject();
+				pFile = (LinkedHashMap<Integer, Event>) ois.readObject();
 
 				return pFile;
 

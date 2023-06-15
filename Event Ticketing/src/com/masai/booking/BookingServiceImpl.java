@@ -29,7 +29,6 @@ public class BookingServiceImpl implements BookingServices{
 
 	@Override
 	public List<Booking> viewAllBookings(List<Booking> Bookings) throws BookingException {
-		// TODO Auto-generated method stub
 		if(Bookings != null && Bookings.size()>0) {
 			return Bookings;
 		}
