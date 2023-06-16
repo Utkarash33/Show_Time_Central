@@ -20,7 +20,6 @@ public class Event implements Serializable {
 	private EventType eventType;
 	private boolean status;
 	private String orgainzer;
-//	private EventOrganizer eventOrgainzer;
 	public Event(int id,String eventName, String venue, LocalDateTime dateTime, double ticketPrice, int totalSeats,
 			EventType eventType, String org) {
 		super();

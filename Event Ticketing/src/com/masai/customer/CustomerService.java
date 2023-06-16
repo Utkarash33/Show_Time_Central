@@ -31,4 +31,6 @@ public interface CustomerService {
 			List<Booking> boo2) throws InvalidDetailsException, EventException, FileNotFoundException, IOException;
 	
 	public  Map<String, Customer>  viewAllCustomers( Map<String, Customer> customer) throws BookingException;
+
+	public void delete(String username, String pass, Map<String, Customer> customer) throws InvalidDetailsException;
 }
