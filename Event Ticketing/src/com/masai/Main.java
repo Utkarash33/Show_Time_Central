@@ -8,6 +8,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -29,6 +30,8 @@ import com.masai.exceptions.DuplicateDataException;
 import com.masai.exceptions.EventException;
 import com.masai.exceptions.InvalidChoiceException;
 import com.masai.exceptions.InvalidDetailsException;
+import com.masai.organizer.EventOrganizer;
+import com.masai.organizer.OrganizerImpl;
 
 
 public class Main {
@@ -138,6 +141,7 @@ public class Main {
 			System.out.println("1. SignIn");
 			System.out.println("2. Login");
 			System.out.println("3. Exit");
+			System.out.println("4. Delete Account");
 			System.out.println("Enter your choice: ");
 			
 			
@@ -161,20 +165,27 @@ public class Main {
 				 
 				customerFunctionality(sc, events , customer,book);
 				break;
-			
 			case 3:
-					 
+				 
+				
 				flag = false;
 				return;
+			
+			case 4:
+				deleteAccount(sc,customer);
+				break;
 			default:
 				 
 				
-				throw new InvalidChoiceException("invalid Choice. Please try again");
+				System.out.println("invalid Choice. Please try again");
+				break;
 			}
 		}
       
 		
 	}
+	
+
 	//Sign in part.//////////
 	
 	private static void customerSignUp(Scanner sc, Map<String, Customer> customer) throws DuplicateDataException, FileNotFoundException, IOException {
@@ -222,7 +233,7 @@ public class Main {
 			do {
 				System.out.println("Select the option of your choice");
 				System.out.println("Press 1 to view all Events");
-				System.out.println("Press 2 to Book Ticket");
+				System.out.println("Press 2 to Book Ticket for an event");
 				System.out.println("Press 3 to add money to a wallet");
 				System.out.println("Press 4 view wallet balance");
 				System.out.println("Press 5 view my details");
@@ -283,28 +294,11 @@ public class Main {
 		}
 	}
 
-	private static void customerViewCustomerBookings(String email, List<Booking> book, BookingServiceImpl boo2) throws BookingException {
-		
-		List<Booking> myTransactions = boo.viewCustomerBookings(email, book);
-
-		for (Booking tr : myTransactions) {
-			System.out.println(tr);
-		}
-	}
-
-
-	private static String customerBookEvent(Scanner sc, String email, Map<Integer, Event> events,
-			Map<String, Customer> customer, List<Booking> boo, CustomerService cusService) throws InvalidDetailsException, EventException, FileNotFoundException, IOException {
-		System.out.println("Enter the event id or name");
-		int id = sc.nextInt();
-		System.out.println("enter the number of tickets");
-		int qty = sc.nextInt();
-		cusService.bookEvent(id, qty, email, events, customer, boo);
-
-		return "You have successfully book for this event";
-	}
-
-
+	
+	
+	///Wallet related classes//////////////
+	
+	
 	public static String customerAddMoneyToWallet(Scanner sc, String email, Map<String, Customer> customers,
 			CustomerService cusService) throws FileNotFoundException, IOException {
 		System.out.println("please enter the amount");
@@ -320,6 +314,30 @@ public class Main {
 		return walletBalance;
 	}
 
+	///Bookings ////////////////
+	
+	
+    private static void customerViewCustomerBookings(String email, List<Booking> book, BookingServiceImpl boo2) throws BookingException {
+		
+		List<Booking> myTransactions = boo.viewCustomerBookings(email, book);
+
+		for (Booking tr : myTransactions) {
+			System.out.println(tr);
+		}
+	}
+
+
+	private static String customerBookEvent(Scanner sc, String email, Map<Integer, Event> events,
+			Map<String, Customer> customer, List<Booking> boo, CustomerService cusService) throws InvalidDetailsException, EventException, FileNotFoundException, IOException {
+		System.out.println("Enter the event id");
+		int id = sc.nextInt();
+		System.out.println("enter the number of tickets");
+		int qty = sc.nextInt();
+		cusService.bookEvent(id, qty, email, events, customer, boo);
+
+		return "You have successfully book for this event";
+	}
+
 	public static void customerViewMyDetails(String email, Map<String, Customer> customers,
 			CustomerService cusService) {
 		Customer cus = cusService.viewCustomerDetails(email, customers);
@@ -328,10 +346,10 @@ public class Main {
 		System.out.println("wallet balance : " + cus.getBalance());
 	}
 
-private static void customerViewAllEvents(Map<Integer, Event> events, EventServicesImpl eventService) throws EventException {
-		
-	eventService.viewAllEvent(events);
-	}
+	    private static void customerViewAllEvents(Map<Integer, Event> events, EventServicesImpl eventService) throws EventException {
+			
+		eventService.viewAllEvent(events);
+		}
 
 
 ///Authentication part//////
@@ -342,20 +360,124 @@ private static void customerViewAllEvents(Map<Integer, Event> events, EventServi
 		System.out.println("Customer has successfully login");
 		
 	}
+	
+	////delete account //////
+	private static void deleteAccount(Scanner sc, Map<String, Customer> customer) throws InvalidDetailsException {
+		System.out.println("please enter the following details to delete account");
+		System.out.println("please enter the username");
+		String email = sc.next();
+		System.out.println("Enter the password");
+		String pass = sc.next();
+		System.out.println("Are you sure? y/n");
+		String sure = sc.next();
+		
+		if(sure.equals("y"))
+		{
+		deleteAccount(email,pass, customer, cusService);
+		}
+		else
+		{
+			return;
+		}
+		
+		
+	}
+
+
+
+	private static void deleteAccount(String username, String pass, Map<String, Customer> customer,
+			CustomerService cusService2) throws InvalidDetailsException {
+		
+			cusService.delete(username, pass,customer);
+			System.out.println("Customer has successfully login");
+	}
+
+
 
 
 	//////Method to handle the functionality related to EventOrganizer
 	
 
-	private static void handleEventOrgainzer(Scanner sc , Map<String, Customer> customer , Map<Integer, Event> events , List<Booking> book) throws AuthenticationException, InvalidDetailsException {
+	private static void handleEventOrgainzer(Scanner sc , Map<String, Customer> customer, Map<Integer, Event> events , List<Booking> book) throws AuthenticationException, InvalidDetailsException, DuplicateDataException, FileNotFoundException, IOException {
 	
-	   
-
-		System.out.println("please enter the following details to add Event");
-		System.out.println("please enter the Organizer Name");
-		String name = sc.next();
+		OrganizerImpl orgnizer = new OrganizerImpl();
+		Map<String , EventOrganizer> org = FileExists.organizerFile();
+		boolean flag = true;
+		while(flag)
+		{
+			System.out.println("1. SignIn");
+			System.out.println("2. Login");
+			System.out.println("3. Exit");
+			System.out.println("Enter your choice: ");
+			
+			
+			int choice = scanner.nextInt();
+			
+			sc.nextLine();
+			
+			switch(choice)
+			{
+			case 1:
+				 
+				organizerSignUp(sc,org);
+				break;
+				
+			
+			case 2:
+				 
+				organizerFunctionality(sc, events ,customer, org,book);
+				break;
+			case 3:
+					 
+				flag = false;
+				return;
+			default:
+				 
+				
+				System.out.println("invalid Choice. Please try again");
+				break;
+			}
+		}
 		
-		System.out.println("Hello ,"+name);
+		System.out.println("Hello");
+		
+			
+	
+	}
+
+	private static void organizerSignUp(Scanner sc, Map<String, EventOrganizer> org) throws FileNotFoundException, DuplicateDataException, IOException {
+		
+		OrganizerImpl orgnizer = new OrganizerImpl();
+		Map<String , EventOrganizer> bookings = FileExists.organizerFile();
+		System.out.println("please enter the following details to Signup");
+		System.out.println("please enter the name");
+		String Name = sc.nextLine();
+		System.out.println("Enter the email");
+		String userName = sc.next();
+		System.out.println("Enter the password");
+		String password = sc.next();
+		
+		
+		EventOrganizer cus = new EventOrganizer(Name, userName, password);
+		orgnizer.signUp(cus, org);
+		System.out.println("Organizer has Succefully sign up");
+	}
+
+
+
+	private static void organizerFunctionality(Scanner sc, Map<Integer, Event> events, Map<String, Customer> customer, Map<String, EventOrganizer> org,
+			List<Booking> book) throws InvalidDetailsException {
+		
+		OrganizerImpl orgnizer = new OrganizerImpl();
+		Map<String , EventOrganizer> orga= FileExists.organizerFile();
+		System.out.println("please enter the following details to login");
+		System.out.println("please enter the username");
+		String email = sc.next();
+		System.out.println("Enter the password");
+		String pass = sc.next();
+		orgnizer.login(email,pass, org);
+		EventOrganizer name = org.get(email);
+		String nameOfOrganizer = name.getName();
 		try { 
 			int choice = 0;
 			do {
@@ -367,20 +489,20 @@ private static void customerViewAllEvents(Map<Integer, Event> events, EventServi
 				System.out.println("Press 5 to logout");
 				
 				
-				///to provide the customer menu////////
+				///to provide the organizer menu////////
 				choice = sc.nextInt();
 				
 				switch (choice) {
 				case 1:
-					String result =addEvent(sc, events, eventService,name);
+					String result =addEvent(sc, events, eventService, nameOfOrganizer);
 					 System.out.println(result);
 					break;
 				case 2:
-					 result =  updateEvent(sc, events);
+					 result =  updateEvent(sc, events,nameOfOrganizer);
 					System.out.println(result);
 					break;
 				case 3:
-					deleteEvent(sc, events, eventService);
+					deleteEvent(sc, events, eventService,customer,nameOfOrganizer);
 					System.out.println("Event has been cancelled");
 					break;
 				case 4:
@@ -400,20 +522,24 @@ private static void customerViewAllEvents(Map<Integer, Event> events, EventServi
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		} 
-			
+	}
+
+
+
+
+
 	
-	}
-
-	private static void ViewAllEventsOrganizer(Map<Integer, Event> events, EventServicesImpl eventService2) throws EventException {
-		
-		
-		eventService.viewAllEventForOrganizer(events);
-	}
-
-
+	
 	//Method related Event ORganizer///////////////////////////
 	
-	public static String addEvent(Scanner sc, Map<Integer, Event> events, EventServices eventService, String nameOrgainzer) throws FileNotFoundException, IOException {
+	
+	
+	private static void ViewAllEventsOrganizer(Map<Integer, Event> events, EventServicesImpl eventService2) throws EventException {
+		eventService.viewAllEventForOrganizer(events);
+	}
+	public static String addEvent(Scanner sc, Map<Integer, Event> events, EventServices eventService, String nameOfOrganizer) throws FileNotFoundException, IOException {
+		OrganizerImpl orgnizer = new OrganizerImpl();
+		Map<String , EventOrganizer> orga= FileExists.organizerFile();
 		sc.nextLine();
 		System.out.println("please enter the Event details");
 		System.out.println("Enter the Event name");
@@ -436,24 +562,60 @@ private static void customerViewAllEvents(Map<Integer, Event> events, EventServi
 		
 		
         int id = IDGeneration.generateId();
-		Event evn = new Event(id, name, venue , dateTime , price, seats,type , nameOrgainzer);
-
-		String str = eventService.addEvent(evn, events);// considering all details are valid
+		Event evn = new Event(id, name, venue , dateTime , price, seats,type,nameOfOrganizer);
+		for (Map.Entry<String, EventOrganizer> me : orga.entrySet()) {
+			  EventOrganizer or =me.getValue();
+			    
+			  
+			List<Event> e=  or.getEvents();
+			  e.add(evn);
+			  
+				ObjectOutputStream orgw = new ObjectOutputStream(new FileOutputStream("Organizer.ser"));
+				orgw.writeObject(orga);
+		}
+		
+		
+		String str = eventService.addEvent(evn, events,nameOfOrganizer);// considering all details are valid
 
 		return str;
 
 	}
-	public static void deleteEvent(Scanner sc, Map<Integer, Event> events, EventServices evnService)
+	public static void deleteEvent(Scanner sc, Map<Integer, Event> events, EventServices evnService,Map<String, Customer> customer, String nameOfOrganizer)
 			throws EventException, FileNotFoundException, IOException {
-
-		System.out.println("please enter the id of product to be deleted");
+		OrganizerImpl orgnizer = new OrganizerImpl();
+		Map<String , EventOrganizer> orga= FileExists.organizerFile();
+		System.out.println("please enter the id of Event to be deleted");
 		int id = sc.nextInt();
-		System.out.println("Name of the orgainzer");
-		String org = sc.next();	
-		evnService.deleteEvent(id, events,org);
+		evnService.deleteEvent(id, events,nameOfOrganizer);
+		ObjectOutputStream orgw = new ObjectOutputStream(new FileOutputStream("Organizer.ser"));
+		orgw.writeObject(orga);
+		for (Entry<String, Customer> me : customer.entrySet()) {
+			Customer a =me.getValue();
+
+			 List<Booking> b = a.getBookingHistory();
+			 Iterator<Booking> iterator = b.iterator();
+			 while (iterator.hasNext()) {
+			     Booking book = iterator.next();
+			     if (book.getEventId() == id) {
+			    	double totalAmount= book.getTotal();
+			    	 a.setBalance(a.getBalance()+totalAmount);
+			         iterator.remove();
+			     }
+			 }
+			 
+			  
+			
+		}
+		ObjectOutputStream cus = new ObjectOutputStream(new FileOutputStream("Customer.ser"));
+		
+		cus.writeObject(cus);
+		
+		
 	}
-	public static String updateEvent(Scanner sc, Map<Integer, Event> event)
-			throws EventException, FileNotFoundException, IOException {
+	public static String updateEvent(Scanner sc, Map<Integer, Event> event,String nameOfOrganizer)
+		throws EventException, FileNotFoundException, IOException {
+		OrganizerImpl orgnizer = new OrganizerImpl();
+		Map<String , EventOrganizer> orga= FileExists.organizerFile();
 		String result = null;
 		System.out.println("please enter the id of the Event which is to be updated");
 		int id = sc.nextInt();
@@ -464,30 +626,29 @@ private static void customerViewAllEvents(Map<Integer, Event> events, EventServi
 
 		System.out.println("Enter the Event venue");
 		String venue = sc.next();
+		sc.nextLine();
 	    System.out.print("Enter date and time (yyyy-MM-dd HH:mm:ss): ");
 	        String input = sc.nextLine();
 	        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 	        LocalDateTime dateTime = LocalDateTime.parse(input, formatter);
 		System.out.println("Enter the Event Type");
-		System.out.println("MOVIE,\r\n"
-				+ "	CONCERT,\r\n"
-				+ "	THEATER,\r\n"
-				+ "	OTHER");
-		 String input1 = sc.nextLine();
+		System.out.println("MOVIE, "+"CONCERT,"+ " THEATER, "+ "	OTHER");
+		 String input1 = sc.nextLine().toLowerCase();
 
 	        EventType type = EventType.valueOf(input1);
 		System.out.println("Enter the Ticket price");
 		double price = sc.nextDouble();
 		System.out.println("Enter the Total number of seats");
-		int seats = sc.nextInt();
-		
-		System.out.println("Name of the orgainzer");
-		String org = sc.next();		
-		Event update = new Event(id, name, venue, dateTime, price, seats, type, org);
+		int seats = sc.nextInt();		
+		Event update = new Event(id, name, venue, dateTime, price, seats, type, nameOfOrganizer);
 				
 		
-		result  = eventService.updateEvent(id, update, event,org);
+		result  = eventService.updateEvent(id, update, event,nameOfOrganizer);
+		ObjectOutputStream orgw = new ObjectOutputStream(new FileOutputStream("Organizer.ser"));
+		orgw.writeObject(orga);
 		return result;
+		
+		
 	}
 
 	
@@ -498,7 +659,6 @@ private static void customerViewAllEvents(Map<Integer, Event> events, EventServi
 	
 	private static void handleAdminstrator(Scanner sc, Map<String, Customer> customer, Map<Integer, Event> event, List<Booking> bookings) {
 		try {
-			sc.nextLine();
 			System.out.println("Enter Administrator username");
 			String username = sc.nextLine();
 			
@@ -515,16 +675,18 @@ private static void customerViewAllEvents(Map<Integer, Event> events, EventServi
 			
 ////////////// Admin Menu///////////////////
 			
-			
+			OrganizerImpl orgnizer = new OrganizerImpl();
+			Map<String , EventOrganizer> orga= FileExists.organizerFile();
 			while(true)
 			{
 				System.out.println("\nAdministrator Menu");
-				System.out.println("1. Approve Event Organizer");
-				System.out.println("2. Reject Event Organizer");
-				System.out.println("3. View Events");
-				System.out.println("4. View Bookings");
-				System.out.println("5. View All Customers");
-				System.out.println("6. Back ");
+				System.out.println("1. Approve or Reject Organzier");
+				System.out.println("2. Approve Event");
+				System.out.println("3. Reject Event");
+				System.out.println("4. View Events");
+				System.out.println("5. View Bookings");
+				System.out.println("6. View All Customers");
+				System.out.println("7. Back ");
 				
 				
 				System.out.println("Enter your choice: ");
@@ -539,35 +701,38 @@ private static void customerViewAllEvents(Map<Integer, Event> events, EventServi
 				{
 				case 1:
 				
-					approveEventOrganizer(sc,event);
+					approveOrRejectOrganizer(sc,orgnizer,orga);
 					break;
 				
 				case 2:
 					 
-					
-					rejectEventOrganizer( sc ,event);
+					approveEvent(sc,event);
 					break;
+					
 				
 				case 3:
-						 
-						
-					viewEvents(event); 
-					break;
+					rejectEvent( sc ,event);
+					break; 
+					
 				case 4:
 					 
 					
-					viewBookings(bookings);
+					viewEvents(event); 
 					break;
+					
 					
 				case 5:
 					
-					viewAllCustomers(customer);
+					viewBookings(bookings);
 					break;
 				
 				case 6:
-					 
+					viewAllCustomers(customer);
+					break;
+				case 7:
+				{
 					return;
-				
+				}
 				default:
 					 
 					System.out.println("invalid choice");
@@ -583,6 +748,109 @@ private static void customerViewAllEvents(Map<Integer, Event> events, EventServi
 		}
 		
 	}
+
+private static void approveOrRejectOrganizer(Scanner sc, OrganizerImpl orgnizer, Map<String, EventOrganizer> orga) throws BookingException, IOException, EventException {
+		
+Map<String, EventOrganizer> list = orgnizer.viewAllOrganizer(orga);
+	
+	for(Map.Entry<String,EventOrganizer > cus : list.entrySet())
+	{
+		System.out.println(cus);
+	}
+	
+	while(true)
+	{
+		System.out.println("1. Approve Organzier");
+		System.out.println("2. Reject Organizer");
+		System.out.println("3. Back ");
+		
+		
+		System.out.println("Enter your choice: ");
+		
+		////after making the choice////////////////
+		
+		int choice = sc.nextInt();
+		
+		sc.nextLine();
+		
+		switch(choice)
+		{
+		case 1:
+		
+			approveOrganizer(sc,orgnizer,orga);
+			break;
+		
+		case 2:
+			 
+			rejectOrganizer(sc,orgnizer,orga);
+			break;
+			
+		default:
+			return;
+		
+	}	
+} 
+
+	
+	
+	}
+
+
+
+private static void rejectOrganizer(Scanner sc, OrganizerImpl orgnizer, Map<String, EventOrganizer> orga) throws FileNotFoundException, IOException, EventException {
+	
+	System.out.println("Enter the username of the Organizer to approve");
+	String  username = sc.nextLine();
+	if (orga != null && orga.size() > 0) {
+
+		if (orga.containsKey(username)) {
+			
+             EventOrganizer event = orga.get(username);
+				orga.remove(username);
+				
+				
+				
+				
+				
+				ObjectOutputStream evn = new ObjectOutputStream(new FileOutputStream("Event.ser"));
+				evn.writeObject(orga);
+		} else {
+			throw new EventException("Event not found");
+		}
+
+	} else {
+		throw new EventException("Event list is empty");
+	}
+}
+
+
+
+private static void approveOrganizer(Scanner sc, OrganizerImpl orgnizer, Map<String, EventOrganizer> orga) throws IOException, EventException {
+	System.out.println("Enter the username of the Organizer to approve");
+	String  username = sc.nextLine();
+	
+	if (orga != null && orga.size() > 0) {
+
+		if (orga.containsKey(username)) {
+			
+             EventOrganizer ev = orga.get(username);
+		    ev.setStatus("Approved");
+		    ObjectOutputStream evn = new ObjectOutputStream(new FileOutputStream("Organizer.ser"));
+			evn.writeObject(orga);
+		
+		    System.out.println("This Organzier has been approved");
+		    System.out.println(ev);
+			
+		} else {
+			throw new EventException("Organizer not found");
+		}
+
+	} else {
+		throw new EventException("Organizer list is empty");
+	}
+}
+
+
 
 private static void viewAllCustomers(Map<String, Customer> customer) throws BookingException {
 	  
@@ -605,10 +873,10 @@ private static void viewBookings(List<Booking> book) throws BookingException {
 	}
 
 	private static void viewEvents(Map<Integer, Event> event) throws EventException {
-		 eventService.viewAllEventForOrganizer(event);
+		 eventService.viewAllEventForAdmin(event);
 	}
 
-	private static void rejectEventOrganizer(Scanner sc, Map<Integer, Event> event) throws EventException, FileNotFoundException, IOException {
+	private static void rejectEvent(Scanner sc, Map<Integer, Event> event) throws EventException, FileNotFoundException, IOException {
 				
 
 			System.out.println("please enter the id of product to be Rejected");
@@ -617,7 +885,7 @@ private static void viewBookings(List<Booking> book) throws BookingException {
 		
 	}
 
-	private static void approveEventOrganizer(Scanner sc ,Map<Integer, Event> event) throws EventException, IOException {
+	private static void approveEvent(Scanner sc ,Map<Integer, Event> event) throws EventException, IOException {
 		
 		System.out.println("Enter the Id of the event to approve");
 		int id = sc.nextInt();

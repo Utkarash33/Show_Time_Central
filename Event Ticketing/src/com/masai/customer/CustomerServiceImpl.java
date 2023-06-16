@@ -111,6 +111,8 @@ public class CustomerServiceImpl  implements CustomerService
 						cus.setBalance(cus.getBalance() - buyingPrice);
 
 						env.setTotalSeats(env.getTotalSeats() - qty);
+						ObjectOutputStream coos = new ObjectOutputStream(new FileOutputStream("Customer.ser"));
+						coos.writeObject(customer);
 
 						events.put(id, env);
                         
@@ -120,7 +122,7 @@ public class CustomerServiceImpl  implements CustomerService
 						book.add(br);
 						cus.setBookingHistory(book);
 						boo.add(br);
-						ObjectOutputStream boos = new ObjectOutputStream(new FileOutputStream("Transactions.ser"));
+						ObjectOutputStream boos = new ObjectOutputStream(new FileOutputStream("Bookings.ser"));
 						boos.writeObject(boo);
 						
 
@@ -151,6 +153,22 @@ public class CustomerServiceImpl  implements CustomerService
 		}
 		else {
 			throw new BookingException("no Customers yet");
+		}
+	}
+
+	@Override
+	public void delete(String username, String pass, Map<String, Customer> customer) throws InvalidDetailsException {
+if (customer.containsKey(username) ) {
+			
+			if(customer.get(username).getPassword().equals(pass)) {
+				customer.remove(username);
+			}
+			else {
+				throw new InvalidDetailsException("Invalid Credentials");
+			}
+			
+		} else {
+			throw new InvalidDetailsException("you have not account to delete");
 		}
 	}
 

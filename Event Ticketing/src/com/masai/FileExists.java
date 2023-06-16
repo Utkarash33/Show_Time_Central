@@ -13,6 +13,7 @@ import java.util.Map;
 import com.masai.booking.Booking;
 import com.masai.customer.Customer;
 import com.masai.event.Event;
+import com.masai.organizer.EventOrganizer;
 
 public class FileExists {
 
@@ -130,6 +131,41 @@ public class FileExists {
 	}
 
 
+	
+	////Organizer
+	public static Map<String, EventOrganizer> organizerFile() {
+
+		Map<String, EventOrganizer> cFile = null;
+		
+		File f = new File("Organizer.ser");
+		boolean flag = false;
+		try {
+			if (!f.exists()) {
+				f.createNewFile();
+				flag = true;
+			}
+
+			if (flag) {
+				cFile = new LinkedHashMap<>();
+				ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(f));
+				oos.writeObject(cFile);
+				return cFile;
+
+			} else {
+				ObjectInputStream ois = new ObjectInputStream(new FileInputStream(f));
+				cFile = (Map<String, EventOrganizer>)ois.readObject();
+
+				return cFile;
+
+			}
+
+		} catch (Exception e) {
+            e.getStackTrace();
+			System.out.println(e.getMessage());
+		}
+		return cFile;
+
+	}
 	
 	
 }

@@ -94,7 +94,7 @@ public class Booking implements Serializable {
 	}
 	@Override
 	public String toString() {
-		return "Booking [username=" + username + ", email=" + email + ", EventId=" + EventId + ", EventName="
+		return "Booking [username=" + username + ", EventId=" + EventId + ", EventName="
 				+ EventName + ", price=" + price + ", total=" + total + ", dt=" + dt + "]";
 	}
 

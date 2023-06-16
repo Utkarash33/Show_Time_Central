@@ -6,18 +6,20 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.Map;
 
+import com.masai.FileExists;
 import com.masai.exceptions.EventException;
+import com.masai.organizer.EventOrganizer;
 
 public class EventServicesImpl implements EventServices{
 
 	@Override
-	public String addEvent(Event prod, Map<Integer, Event> Events) throws FileNotFoundException, IOException {
+	public String addEvent(Event prod, Map<Integer, Event> Events, String nameOfOrganizer) throws FileNotFoundException, IOException {
 		
 //as our id's are always unique thats why directly putting into Events
 		
 		Events.put(prod.getId(), prod);
 		ObjectOutputStream evn = new ObjectOutputStream(new FileOutputStream("Event.ser"));
-		evn.writeObject(Events);
+		evn.writeObject(Events);	
 		return "Event added successfully";
 
 	}
@@ -61,6 +63,7 @@ public class EventServicesImpl implements EventServices{
 					Events.remove(id);
 					ObjectOutputStream evn = new ObjectOutputStream(new FileOutputStream("Event.ser"));
 					evn.writeObject(Events);
+					
 				
 					System.out.println("Event deleted successfully");
 				}else
@@ -91,7 +94,7 @@ public class EventServicesImpl implements EventServices{
 					Events.put(id, prod);
 					ObjectOutputStream evn = new ObjectOutputStream(new FileOutputStream("Event.ser"));
 					evn.writeObject(Events);
-				
+					
 					return "Event has successfully updated";
 				}else
 				{
@@ -119,7 +122,7 @@ public class EventServicesImpl implements EventServices{
 					str = "Approved";
 				}
 				
-					System.out.println(me.getValue()+" "+"Status " + str);
+					System.out.println("Status " + str+" "+me.getValue());
 			}
 
 		} else {
@@ -127,6 +130,25 @@ public class EventServicesImpl implements EventServices{
 		}
 	}
 
+	
+	public void viewAllEventForAdmin(Map<Integer, Event> events) throws EventException {
+		if (events != null && events.size() > 0) {
+			for (Map.Entry<Integer, Event> me : events.entrySet()) {
+				Event a =me.getValue();
+				String str = "Pending";
+				String b = a.getOrgainzer();
+				if(a.getStatus())
+				{
+					str = "Approved";
+				}
+				
+					System.out.println("Organier :" +" "+b+"->"+" "+"Status " + str+" "+me.getValue());
+			}
+
+		} else {
+			throw new EventException("Event List is empty");
+		}
+	}
 	
 	
 	@Override

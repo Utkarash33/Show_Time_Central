@@ -7,7 +7,7 @@ import java.util.Map;
 import com.masai.exceptions.EventException;
 
 public interface EventServices {
-	public String addEvent(Event pro, Map<Integer, Event> products) throws FileNotFoundException, IOException;
+	public String addEvent(Event pro, Map<Integer, Event> products, String nameOfOrganizer) throws FileNotFoundException, IOException;
 
 	public void viewAllEvent(Map<Integer, Event> products) throws EventException;
 
