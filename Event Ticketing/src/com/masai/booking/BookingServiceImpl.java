@@ -21,7 +21,7 @@ public class BookingServiceImpl implements BookingServices{
 			}
 		}
 		if (!flag) {
-			throw new BookingException("you hav not done any Booking yet");
+			throw new BookingException("you have not Book any event yet");
 		}
 
 		return myBookings;

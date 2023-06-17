@@ -389,7 +389,7 @@ public class Main {
 			CustomerService cusService2) throws InvalidDetailsException {
 		
 			cusService.delete(username, pass,customer);
-			System.out.println("Customer has successfully login");
+			System.out.println("Account has been deleted.");
 	}
 
 
