@@ -138,7 +138,9 @@ public class Main {
 		boolean flag = true;
 		while(flag)
 		{
-			System.out.println("1. SignIn");
+			
+			///make choice 
+			System.out.println("1. SignUp");
 			System.out.println("2. Login");
 			System.out.println("3. Exit");
 			System.out.println("4. Delete Account");
@@ -154,6 +156,7 @@ public class Main {
 			case 1:
 				 
 				try {
+					//customer signup
 					customerSignUp(sc,customer);
 				} catch (DuplicateDataException | IOException e) {
 					e.printStackTrace();
@@ -162,21 +165,23 @@ public class Main {
 				
 			
 			case 2:
+				//login
 				 
 				customerFunctionality(sc, events , customer,book);
 				break;
 			case 3:
-				 
+				 //exit to previous menu
 				
 				flag = false;
 				return;
 			
 			case 4:
+				//delete account
 				deleteAccount(sc,customer);
 				break;
 			default:
 				 
-				
+				//invalid choice
 				System.out.println("invalid Choice. Please try again");
 				break;
 			}
@@ -209,28 +214,33 @@ public class Main {
 		Customer cus = new Customer(firstName, lastName,address, mobile, userName, password, money);
 
 		CustomerService cusService = new CustomerServiceImpl();
+		
+		//Pass the customer object and the customer map to verify if the customer user name is unique of not 
 		cusService.signUp(cus, customer);
 		System.out.println("customer has Succefully sign up");
 
 	}
 
+	
+//	Login part/////////////////
+	
 	private static void customerFunctionality(Scanner sc, Map<Integer, Event> events, Map<String, Customer> customer, List<Booking> book) throws AuthenticationException, InvalidDetailsException {
 	
 		
-//		Login part/////////////////
-		
-		
-		
-		
+
 		System.out.println("please enter the following details to login");
 		System.out.println("please enter the username");
 		String email = sc.next();
 		System.out.println("Enter the password");
 		String pass = sc.next();
+		
+		///it's basically the Authentication of the user if any issue occur then the message or the exception has been thrown 
 		customerLogin(email,pass, customer, cusService);
 		try { 
 			int choice = 0;
 			do {
+				//after login customer menu
+				
 				System.out.println("Select the option of your choice");
 				System.out.println("Press 1 to view all Events");
 				System.out.println("Press 2 to Book Ticket for an event");
@@ -280,10 +290,14 @@ public class Main {
 					customerViewCustomerBookings(email, book, boo);
 					break;
 				case 7:
+					
+					//Logout of the system
 					System.out.println("you have successsfully logout");
 					choice=10;
 					return;
 				default:
+					
+					//invalid choice
 					System.out.println("invalid choice");
 					break;
 				}
@@ -298,6 +312,7 @@ public class Main {
 	
 	///Wallet related classes//////////////
 	
+	//To add money into the wallet
 	
 	public static String customerAddMoneyToWallet(Scanner sc, String email, Map<String, Customer> customers,
 			CustomerService cusService) throws FileNotFoundException, IOException {
@@ -308,6 +323,9 @@ public class Main {
 		return "Amount: " + money + " successfully added to your wallet";
 	}
 
+	
+	//to check wallet balance
+	
 	public static double customerViewWalletBalance(String email, Map<String, Customer> customers,
 			CustomerService cusService) {
 		double walletBalance = cusService.viewWalletBalance(email, customers);
@@ -316,6 +334,7 @@ public class Main {
 
 	///Bookings ////////////////
 	
+	// to check or see all the details of the booking made by the particular customer
 	
     private static void customerViewCustomerBookings(String email, List<Booking> book, BookingServiceImpl boo2) throws BookingException {
 		
@@ -326,6 +345,8 @@ public class Main {
 		}
 	}
 
+    
+    //to book the an event // to book event for know have to entry to id or the event
 
 	private static String customerBookEvent(Scanner sc, String email, Map<Integer, Event> events,
 			Map<String, Customer> customer, List<Booking> boo, CustomerService cusService) throws InvalidDetailsException, EventException, FileNotFoundException, IOException {
@@ -338,21 +359,29 @@ public class Main {
 		return "You have successfully book for this event";
 	}
 
+	
+	// to view the personal details like name address and wallet balance (can add more fields if required)
+	
 	public static void customerViewMyDetails(String email, Map<String, Customer> customers,
 			CustomerService cusService) {
 		Customer cus = cusService.viewCustomerDetails(email, customers);
-		System.out.println("name : " + cus.getUserName());
+		System.out.println("name : " + cus.getFirstName()+" "+cus.getLastName());
 		System.out.println("address : " + cus.getAddress());
 		System.out.println("wallet balance : " + cus.getBalance());
 	}
 
+	
+	//to check add the events present 
+	//basically check the events first then copy the id of the event which you want to book and then use that id to book the event
+	
+	
 	    private static void customerViewAllEvents(Map<Integer, Event> events, EventServicesImpl eventService) throws EventException {
 			
 		eventService.viewAllEvent(events);
 		}
 
 
-///Authentication part//////
+///Authentication part////// related to the login 
 	
 	private static void customerLogin(String username, String pass, Map<String, Customer> customer,
 			CustomerService cusService) throws AuthenticationException, InvalidDetailsException {
@@ -362,6 +391,8 @@ public class Main {
 	}
 	
 	////delete account //////
+	// have to fill the correct user name and password 
+	
 	private static void deleteAccount(Scanner sc, Map<String, Customer> customer) throws InvalidDetailsException {
 		System.out.println("please enter the following details to delete account");
 		System.out.println("please enter the username");
@@ -384,6 +415,8 @@ public class Main {
 	}
 
 
+	
+    // will delete the account and update the customer file	
 
 	private static void deleteAccount(String username, String pass, Map<String, Customer> customer,
 			CustomerService cusService2) throws InvalidDetailsException {
@@ -405,6 +438,7 @@ public class Main {
 		boolean flag = true;
 		while(flag)
 		{
+			//Organizer menu
 			System.out.println("1. SignIn");
 			System.out.println("2. Login");
 			System.out.println("3. Exit");
@@ -418,21 +452,22 @@ public class Main {
 			switch(choice)
 			{
 			case 1:
-				 
+				 //sign in
 				organizerSignUp(sc,org);
 				break;
 				
 			
 			case 2:
-				 
+				 //login
 				organizerFunctionality(sc, events ,customer, org,book);
 				break;
 			case 3:
-					 
+				//move back to previous menu	 
 				flag = false;
 				return;
 			default:
-				 
+				
+				//invalid choice
 				
 				System.out.println("invalid Choice. Please try again");
 				break;
@@ -444,6 +479,7 @@ public class Main {
 			
 	
 	}
+	//Organizer signin need only name unique email and have to wait until approved by the admin
 
 	private static void organizerSignUp(Scanner sc, Map<String, EventOrganizer> org) throws FileNotFoundException, DuplicateDataException, IOException {
 		
@@ -464,7 +500,7 @@ public class Main {
 	}
 
 
-
+//Organizer login after approved can login
 	private static void organizerFunctionality(Scanner sc, Map<Integer, Event> events, Map<String, Customer> customer, Map<String, EventOrganizer> org,
 			List<Booking> book) throws InvalidDetailsException {
 		
@@ -481,6 +517,8 @@ public class Main {
 		try { 
 			int choice = 0;
 			do {
+				
+				//after login all the options organizer have
 				System.out.println("Select the option of your choice");
 				System.out.println("Press 1 to add new Events");
 				System.out.println("Press 2 to update an event");
@@ -494,14 +532,18 @@ public class Main {
 				
 				switch (choice) {
 				case 1:
+					//to add event on the platform
+					
 					String result =addEvent(sc, events, eventService, nameOfOrganizer);
 					 System.out.println(result);
 					break;
 				case 2:
+					//update event
 					 result =  updateEvent(sc, events,nameOfOrganizer);
 					System.out.println(result);
 					break;
 				case 3:
+					//delete or remove the event
 					deleteEvent(sc, events, eventService,customer,nameOfOrganizer);
 					System.out.println("Event has been cancelled");
 					break;
@@ -510,6 +552,7 @@ public class Main {
 					ViewAllEventsOrganizer(events, eventService);
 					break;
 				case 5:
+					//logout
 					System.out.println("you have successsfully logout");
 					choice=10;
 					return;
@@ -532,11 +575,14 @@ public class Main {
 	
 	//Method related Event ORganizer///////////////////////////
 	
-	
-	
+	//(Note:to do any modifiation to an event event id is required like for delete or update an event)
+	//organizer can see all the event posted by him/her.
 	private static void ViewAllEventsOrganizer(Map<Integer, Event> events, EventServicesImpl eventService2) throws EventException {
 		eventService.viewAllEventForOrganizer(events);
 	}
+
+	//(Note: it's also have to be approved by the admin before appear for the customer)
+	//add event 
 	public static String addEvent(Scanner sc, Map<Integer, Event> events, EventServices eventService, String nameOfOrganizer) throws FileNotFoundException, IOException {
 		OrganizerImpl orgnizer = new OrganizerImpl();
 		Map<String , EventOrganizer> orga= FileExists.organizerFile();
@@ -580,6 +626,9 @@ public class Main {
 		return str;
 
 	}
+	
+	//to remove an event
+    // (Note: if organizer or admin delete an event that's booked by some customer the money will we refunded. to those customers)
 	public static void deleteEvent(Scanner sc, Map<Integer, Event> events, EventServices evnService,Map<String, Customer> customer, String nameOfOrganizer)
 			throws EventException, FileNotFoundException, IOException {
 		OrganizerImpl orgnizer = new OrganizerImpl();
@@ -612,6 +661,12 @@ public class Main {
 		
 		
 	}
+	
+	
+	
+	//to upgrade 
+    //(Note: non of the upgrade will we appear in the customer profile who has already book the event)
+	
 	public static String updateEvent(Scanner sc, Map<Integer, Event> event,String nameOfOrganizer)
 		throws EventException, FileNotFoundException, IOException {
 		OrganizerImpl orgnizer = new OrganizerImpl();
@@ -656,6 +711,7 @@ public class Main {
 	
 	
 	//////Method to handle the functionality related to Admin
+	///there is only one admin for know so the username and the password is hardcoded. (admin/admin)
 	
 	private static void handleAdminstrator(Scanner sc, Map<String, Customer> customer, Map<Integer, Event> event, List<Booking> bookings) {
 		try {
@@ -679,6 +735,7 @@ public class Main {
 			Map<String , EventOrganizer> orga= FileExists.organizerFile();
 			while(true)
 			{
+				//after login admin functionality
 				System.out.println("\nAdministrator Menu");
 				System.out.println("1. Approve or Reject Organzier");
 				System.out.println("2. Approve Event");
@@ -700,37 +757,44 @@ public class Main {
 				switch(choice)
 				{
 				case 1:
+					///approve or reject the organizers
 				
 					approveOrRejectOrganizer(sc,orgnizer,orga);
 					break;
 				
 				case 2:
 					 
+					///approve the events
 					approveEvent(sc,event);
 					break;
 					
 				
 				case 3:
+					//reject the events
 					rejectEvent( sc ,event);
 					break; 
 					
 				case 4:
 					 
-					
+					// to see all the events on the platform
 					viewEvents(event); 
 					break;
 					
 					
 				case 5:
+					// to see all the bookings made on the platform
 					
 					viewBookings(bookings);
 					break;
 				
 				case 6:
+					
+					// to view all the customers
 					viewAllCustomers(customer);
 					break;
 				case 7:
 				{
+					//to return to previous menu
 					return;
 				}
 				default:
@@ -748,6 +812,8 @@ public class Main {
 		}
 		
 	}
+	
+	//approve to reject the organizer 
 
 private static void approveOrRejectOrganizer(Scanner sc, OrganizerImpl orgnizer, Map<String, EventOrganizer> orga) throws BookingException, IOException, EventException {
 		
@@ -760,6 +826,7 @@ Map<String, EventOrganizer> list = orgnizer.viewAllOrganizer(orga);
 	
 	while(true)
 	{
+		//menu to pick 
 		System.out.println("1. Approve Organzier");
 		System.out.println("2. Reject Organizer");
 		System.out.println("3. Back ");
@@ -776,16 +843,18 @@ Map<String, EventOrganizer> list = orgnizer.viewAllOrganizer(orga);
 		switch(choice)
 		{
 		case 1:
-		
+		//approve 
 			approveOrganizer(sc,orgnizer,orga);
 			break;
 		
 		case 2:
-			 
+			 //reject
 			rejectOrganizer(sc,orgnizer,orga);
 			break;
 			
 		default:
+			
+			//to back to main menu of admin
 			return;
 		
 	}	
@@ -795,11 +864,13 @@ Map<String, EventOrganizer> list = orgnizer.viewAllOrganizer(orga);
 	
 	}
 
-
+//to reject the organizer 
+// Organizer will be rejected by entrying it's user name 
+// Once the organizer will rejected his/her account will re deleted for the system and have to resign in to again apply to become the organizer
 
 private static void rejectOrganizer(Scanner sc, OrganizerImpl orgnizer, Map<String, EventOrganizer> orga) throws FileNotFoundException, IOException, EventException {
 	
-	System.out.println("Enter the username of the Organizer to approve");
+	System.out.println("Enter the username of the Organizer to reject");
 	String  username = sc.nextLine();
 	if (orga != null && orga.size() > 0) {
 
@@ -823,6 +894,8 @@ private static void rejectOrganizer(Scanner sc, OrganizerImpl orgnizer, Map<Stri
 	}
 }
 
+//to approved the organizer 
+// same way have to use the organizer username to approve him/her as a organizer 
 
 
 private static void approveOrganizer(Scanner sc, OrganizerImpl orgnizer, Map<String, EventOrganizer> orga) throws IOException, EventException {
@@ -862,7 +935,7 @@ private static void viewAllCustomers(Map<String, Customer> customer) throws Book
 	}
 	}
 
-
+// to view all the booking made on the platform
 
 private static void viewBookings(List<Booking> book) throws BookingException {
 		
@@ -872,10 +945,17 @@ private static void viewBookings(List<Booking> book) throws BookingException {
 		}
 	}
 
+
+// to view all the events on the platform
+// to approve to reject any event have to use the id of that event so first view all the events and then do the next part
+
 	private static void viewEvents(Map<Integer, Event> event) throws EventException {
 		 eventService.viewAllEventForAdmin(event);
 	}
 
+	//reject or cancel an event work as same way as cancelled by the organizer//
+	// Means money will be refunded to the customer if the event is booked by then.
+	
 	private static void rejectEvent(Scanner sc, Map<Integer, Event> event) throws EventException, FileNotFoundException, IOException {
 				
 
@@ -885,6 +965,11 @@ private static void viewBookings(List<Booking> book) throws BookingException {
 		
 	}
 
+	
+	
+	//to approve the event 
+	//Note once the event has been approved only then it can we visible to the customer on customer side//
+	
 	private static void approveEvent(Scanner sc ,Map<Integer, Event> event) throws EventException, IOException {
 		
 		System.out.println("Enter the Id of the event to approve");
