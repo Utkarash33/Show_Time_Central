@@ -140,6 +140,7 @@ public class Main {
 		{
 			
 			///make choice 
+			System.out.println("Customer login/Singup");
 			System.out.println("1. SignUp");
 			System.out.println("2. Login");
 			System.out.println("3. Exit");
@@ -439,7 +440,8 @@ public class Main {
 		while(flag)
 		{
 			//Organizer menu
-			System.out.println("1. SignIn");
+			System.out.println("Organizer login/SginUp");
+			System.out.println("1. SignUp");
 			System.out.println("2. Login");
 			System.out.println("3. Exit");
 			System.out.println("Enter your choice: ");
@@ -658,6 +660,7 @@ public class Main {
 		ObjectOutputStream cus = new ObjectOutputStream(new FileOutputStream("Customer.ser"));
 		
 		cus.writeObject(cus);
+		System.out.println("Event has been deleted");
 		
 		
 	}
